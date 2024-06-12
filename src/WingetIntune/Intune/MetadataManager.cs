@@ -36,7 +36,15 @@ public class MetadataManager
         logger.LogDebug("Loading package info from {filename}", filename);
 
         var data = await fileManager.ReadAllBytesAsync(filename, cancellationToken);
-        return JsonSerializer.Deserialize<PackageInfo>(data, MyJsonContext.Default.PackageInfo)!;
+        var packageInfo = JsonSerializer.Deserialize<PackageInfo>(data, MyJsonContext.Default.PackageInfo);
+        
+        if (packageInfo == null)
+        {
+            throw new InvalidOperationException($"Failed to deserialize package info from {filename}");
+        }
+
+        logger?.LogDebug($"Loaded package info successfully from {filename}");
+        return packageInfo;
     }
 
     public Task<PackageInfo> LoadPackageInfoFromFolderAsync(string rootFolder, string packageId, string version, CancellationToken cancellationToken) =>
